@@ -26,6 +26,26 @@ public class HapticsModule: Module {
       generator.selectionChanged()
     }
     .runOnQueue(.main)
+    
+    // New modular function to handle intensity, sharpness, and events
+    AsyncFunction("customHapticFeedbackAsync") { (intensity: Double, sharpness: Double, relativeTime: Double) in
+      guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+      var events = [CHHapticEvent]()
+      
+      let intensityParam = CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(intensity))
+      let sharpnessParam = CHHapticEventParameter(parameterID: .hapticSharpness, value: Float(sharpness))
+      let event = CHHapticEvent(eventType: .hapticTransient, parameters: [intensityParam, sharpnessParam], relativeTime: relativeTime)
+      events.append(event)
+      
+      do {
+        let pattern = try CHHapticPattern(events: events, parameters: [])
+        let player = try self.engine?.makePlayer(with: pattern)
+        try player?.start(atTime: 0)
+      } catch {
+        print("Failed to play pattern: \(error.localizedDescription).")
+      }
+    }
+    .runOnQueue(.main)
   }
 
   enum NotificationType: String, EnumArgument {
@@ -61,22 +81,9 @@ public class HapticsModule: Module {
       }
     }
   }
-}
-
-// SwiftUI integration for haptic feedback
-struct HapticButton: View {
-  @State private var counter = 0
+  
   @State private var engine: CHHapticEngine?
-
-  var body: some View {
-    Button("Tap Count: \(counter)") {
-      counter += 1
-      self.triggerHapticFeedback()
-    }
-    .sensoryFeedback(.increase, trigger: counter)
-    .onAppear(perform: prepareHaptics)
-  }
-
+  
   func prepareHaptics() {
     guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
 
@@ -85,24 +92,6 @@ struct HapticButton: View {
       try engine?.start()
     } catch {
       print("There was an error creating the engine: \(error.localizedDescription)")
-    }
-  }
-
-  func triggerHapticFeedback() {
-    guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
-    var events = [CHHapticEvent]()
-
-    let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: 1)
-    let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 1)
-    let event = CHHapticEvent(eventType: .hapticTransient, parameters: [intensity, sharpness], relativeTime: 0)
-    events.append(event)
-
-    do {
-      let pattern = try CHHapticPattern(events: events, parameters: [])
-      let player = try engine?.makePlayer(with: pattern)
-      try player?.start(atTime: 0)
-    } catch {
-      print("Failed to play pattern: \(error.localizedDescription).")
     }
   }
 }
