@@ -129,3 +129,10 @@ export enum AndroidHaptics {
    */
   Text_Handle_Move = 'text-handle-move',
 }
+
+// New Type for Custom Haptic Feedback
+export interface CustomHapticFeedback {
+  intensity: number;
+  sharpness: number;
+  relativeTime: number;
+}
