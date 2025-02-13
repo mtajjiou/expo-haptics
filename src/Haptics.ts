@@ -67,4 +67,19 @@ export async function swiftUIHapticFeedback(type: string, trigger: any): Promise
   await ExpoHaptics.swiftUIHapticFeedback(type, trigger);
 }
 
+// Custom haptic feedback function to handle intensity, sharpness, and events
+export async function customHapticFeedbackAsync(
+  intensity: number,
+  sharpness: number,
+  relativeTime: number
+): Promise<void> {
+  if (Platform.OS !== 'ios') {
+    return;
+  }
+  if (!ExpoHaptics?.customHapticFeedbackAsync) {
+    throw new UnavailabilityError('Haptics', 'customHapticFeedbackAsync');
+  }
+  await ExpoHaptics.customHapticFeedbackAsync(intensity, sharpness, relativeTime);
+}
+
 export { NotificationFeedbackType, ImpactFeedbackStyle, AndroidHaptics };
