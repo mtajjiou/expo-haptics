@@ -1,5 +1,4 @@
 import { Platform, UnavailabilityError } from 'expo-modules-core';
-
 import ExpoHaptics from './ExpoHaptics';
 import { NotificationFeedbackType, ImpactFeedbackStyle, AndroidHaptics } from './Haptics.types';
 
@@ -58,6 +57,14 @@ export async function performAndroidHapticsAsync(type: AndroidHaptics) {
     return;
   }
   ExpoHaptics.performHapticsAsync(type);
+}
+
+// Add support for SwiftUI haptic feedback
+export async function swiftUIHapticFeedback(type: string, trigger: any): Promise<void> {
+  if (!ExpoHaptics?.swiftUIHapticFeedback) {
+    throw new UnavailabilityError('Haptics', 'swiftUIHapticFeedback');
+  }
+  await ExpoHaptics.swiftUIHapticFeedback(type, trigger);
 }
 
 export { NotificationFeedbackType, ImpactFeedbackStyle, AndroidHaptics };
